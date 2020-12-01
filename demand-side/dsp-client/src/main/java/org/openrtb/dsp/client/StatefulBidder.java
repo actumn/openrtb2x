@@ -86,7 +86,7 @@ public class StatefulBidder implements OpenRTBAPI {
 		if (request == null) {
 			logger.error("BidRequest object was null");
 			return false;
-		} else { 
+		} else {
 			if (request.getId() == null) {
 					logger.error("BidRequest must have valid Id");
 					return false;
@@ -200,7 +200,7 @@ public class StatefulBidder implements OpenRTBAPI {
 	private static final FSMTransition<TSMStates, String> EV_OFFER_EXPIRED = StatefulBidder
 			.newTransition("OfferExpired");
 	private static final FSMTransition<TSMStates, String> EV_WIN_NOTIFICATION = StatefulBidder
-	.newTransition("WinNotification");	
+	.newTransition("WinNotification");
 
 	private class TSMController {
 		StatefulBidder bidder;
@@ -209,7 +209,7 @@ public class StatefulBidder implements OpenRTBAPI {
 		FiniteStateMachine<TSMStates> tsm;
 		private final Timer requestTimer = new Timer();
 		private final Timer offerTimer = new Timer();
-	
+
 		TSMController(StatefulBidder statefulBidder, RTBRequestWrapper wReq) {
 			this.bidder = statefulBidder;
 			this.request = wReq;
@@ -223,21 +223,21 @@ public class StatefulBidder implements OpenRTBAPI {
 			tsm.addTransition(TSMStates.TXN_WAIT_OPEN, EV_FORMATERROR, TSMStates.TXN_FORMATERROR);
 			tsm.addTransition(TSMStates.TXN_WAIT_OPEN, EV_REQUEST_EXPIRED, TSMStates.TXN_REQUESTEXPIRED);
 			tsm.addTransition(TSMStates.TXN_WAIT_OPEN, EV_NOTSUPPORTED, TSMStates.TXN_NOBID);
-			tsm.addTransition(TSMStates.TXN_WAIT_OPEN, EV_NOMATCHINGBIDS, TSMStates.TXN_NOBID);		
+			tsm.addTransition(TSMStates.TXN_WAIT_OPEN, EV_NOMATCHINGBIDS, TSMStates.TXN_NOBID);
 			tsm.addTransition(TSMStates.TXN_WAIT_OPEN, EV_BIDSOFFERED, TSMStates.TXN_WAIT_BIDSOFFERED);
 			tsm.addTransition(TSMStates.TXN_WAIT_BIDSOFFERED, EV_OFFER_EXPIRED, TSMStates.TXN_OFFEREXPIRED);
 			tsm.addTransition(TSMStates.TXN_WAIT_BIDSOFFERED, EV_WIN_NOTIFICATION, TSMStates.TXN_COMPLETE);
-			
+
 		}
 		public void exec(TSMStates startState) {
-			tsm.exec(startState, this);
+			tsm.exec(startState, TSMController.this);
 		}
 
 		private final TimerTask requestTimerTask = new TimerTask() {
 			@Override
 			public void run() {
 				EV_REQUEST_EXPIRED.setState(tsm.getCurrent());
-				tsm.followTransition(EV_REQUEST_EXPIRED, this);
+				tsm.followTransition(EV_REQUEST_EXPIRED, TSMController.this);
 			}
 		};
 
@@ -245,7 +245,7 @@ public class StatefulBidder implements OpenRTBAPI {
 			@Override
 			public void run() {
 				EV_OFFER_EXPIRED.setState(tsm.getCurrent());
-				tsm.followTransition(EV_OFFER_EXPIRED, this);
+				tsm.followTransition(EV_OFFER_EXPIRED, TSMController.this);
 			}
 		};
 
@@ -275,7 +275,7 @@ public class StatefulBidder implements OpenRTBAPI {
 			public synchronized FSMTransition<TSMStates, String> exec(Object ctx)
 					throws FSMException {
 				TSMController context = (TSMController) ctx;
-				context.bidder.logger.info("New Request");				
+				context.bidder.logger.info("New Request");
 				context.setRequestTimer();
 				EV_NEWREQUEST.setState(this);
 				return EV_NEWREQUEST;
@@ -373,7 +373,7 @@ public class StatefulBidder implements OpenRTBAPI {
 				return null; // this is an end state
 			}
 		},
-		
+
 		TXN_COMPLETE {
 			public synchronized FSMTransition<TSMStates, String> exec(Object ctx)
 					throws FSMException {

@@ -44,7 +44,8 @@ public class JsonFileBackedDAOTest
         catch (Exception e)
         {
             assertTrue("The DSPException should occur", e.getClass().getName().equals("org.openrtb.dsp.intf.model.DSPException"));
-            String msg = "dummyfile.json (No such file or directory)";
+            System.out.println(e.getMessage());
+            String msg = "dummyfile.json (그런 파일이나 디렉터리가 없습니다)";
             assertTrue("The message should match", e.getMessage().equals(msg));
         }
     }
